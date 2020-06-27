@@ -87,7 +87,12 @@ func doRun(ctx *context.Context, client client.Client) error {
 
 	var path = ctx.Config.Scoop.Name + ".json"
 
-	content, err := buildManifest(ctx, archives)
+	manifest, err := buildManifest(ctx, archives)
+	if err != nil {
+		return err
+	}
+
+	content, err := renderManifest(manifest)
 	if err != nil {
 		return err
 	}
@@ -142,8 +147,17 @@ type Resource struct {
 	Hash string   `json:"hash"` // the archive checksum
 }
 
-func buildManifest(ctx *context.Context, artifacts []*artifact.Artifact) (bytes.Buffer, error) {
-	var result bytes.Buffer
+func renderManifest(manifest *Manifest) (bytes.Buffer, error) {
+	var buffer bytes.Buffer
+	data, err := json.MarshalIndent(manifest, "", "    ")
+	if err != nil {
+		return buffer, err
+	}
+	_, err = buffer.Write(data)
+	return buffer, err
+}
+
+func buildManifest(ctx *context.Context, artifacts []*artifact.Artifact) (*Manifest, error) {
 	var manifest = Manifest{
 		Version:      ctx.Version,
 		Architecture: map[string]Resource{},
@@ -170,7 +184,7 @@ func buildManifest(ctx *context.Context, artifacts []*artifact.Artifact) (bytes.
 				ctx.Config.Release.GitLab.Name,
 			)
 		default:
-			return result, ErrTokenTypeNotImplementedForScoop
+			return nil, ErrTokenTypeNotImplementedForScoop
 		}
 	}
 
@@ -184,12 +198,12 @@ func buildManifest(ctx *context.Context, artifacts []*artifact.Artifact) (bytes.
 			WithArtifact(artifact, map[string]string{}).
 			Apply(ctx.Config.Scoop.URLTemplate)
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 
 		sum, err := artifact.Checksum("sha256")
 		if err != nil {
-			return result, err
+			return nil, err
 		}
 
 		log.WithFields(log.Fields{
@@ -206,12 +220,7 @@ func buildManifest(ctx *context.Context, artifacts []*artifact.Artifact) (bytes.
 		}
 	}
 
-	data, err := json.MarshalIndent(manifest, "", "    ")
-	if err != nil {
-		return result, err
-	}
-	_, err = result.Write(data)
-	return result, err
+	return &manifest, nil
 }
 
 func binaries(a *artifact.Artifact) []string {

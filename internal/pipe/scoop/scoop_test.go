@@ -1,6 +1,7 @@
 package scoop
 
 import (
+	"encoding/json"
 	"flag"
 	"io/ioutil"
 	"os"
@@ -878,7 +879,7 @@ func Test_buildManifest(t *testing.T) {
 			var ctx = tt.ctx
 			err := Pipe{}.Default(ctx)
 			require.NoError(t, err)
-			out, err := buildManifest(ctx, []*artifact.Artifact{
+			manifest, err := buildManifest(ctx, []*artifact.Artifact{
 				{
 					Name:   "foo_1.0.1_windows_amd64.tar.gz",
 					Goos:   "windows",
@@ -918,11 +919,12 @@ func Test_buildManifest(t *testing.T) {
 			require.NoError(t, err)
 
 			if *update {
-				require.NoError(t, ioutil.WriteFile(tt.filename, out.Bytes(), 0655))
+				b, err := renderManifest(manifest)
+				require.NoError(t, err)
+				require.NoError(t, ioutil.WriteFile(tt.filename, b.Bytes(), 0655))
 			}
-			bts, err := ioutil.ReadFile(tt.filename)
-			require.NoError(t, err)
-			require.Equal(t, string(bts), out.String())
+			expectedManifest := parseManifestFromFile(t, tt.filename)
+			require.Equal(t, expectedManifest, manifest)
 		})
 	}
 }
@@ -971,7 +973,7 @@ func TestWrapInDirectory(t *testing.T) {
 		},
 	}
 	require.NoError(t, Pipe{}.Default(ctx))
-	out, err := buildManifest(ctx, []*artifact.Artifact{
+	manifest, err := buildManifest(ctx, []*artifact.Artifact{
 		{
 			Name:   "foo_1.0.1_windows_amd64.tar.gz",
 			Goos:   "windows",
@@ -994,13 +996,27 @@ func TestWrapInDirectory(t *testing.T) {
 
 	require.NoError(t, err)
 
+
 	var golden = "testdata/test_buildmanifest_wrap.json.golden"
 	if *update {
-		require.NoError(t, ioutil.WriteFile(golden, out.Bytes(), 0655))
+		b, err := renderManifest(manifest)
+				require.NoError(t, err)
+				require.NoError(t, ioutil.WriteFile(golden, b.Bytes(), 0655))
 	}
-	bts, err := ioutil.ReadFile(golden)
+	expectedManifest := parseManifestFromFile(t, golden)
 	require.NoError(t, err)
-	require.Equal(t, string(bts), out.String())
+	require.Equal(t, expectedManifest, manifest)
+}
+
+func parseManifestFromFile(t *testing.T, filePath string) *Manifest {
+	b, err := ioutil.ReadFile(filePath)
+	require.NoError(t, err)
+
+	m := Manifest{}
+	err = json.Unmarshal(b, &m)
+	require.NoError(t, err)
+
+	return &m
 }
 
 type DummyClient struct {
