@@ -40,7 +40,7 @@ func TestMain(m *testing.M) {
 
 func copyDirRecursively(origin, target string) ([]byte, error) {
 	if runtime.GOOS == "windows" {
-		return exec.Command("xcopy", "/Y", "/E", origin, target).CombinedOutput()
+		return exec.Command("xcopy", "/E", origin, target, "/Y").CombinedOutput()
 	}
 	return exec.Command("cp", "-Rf", origin, target).CombinedOutput()
 }
