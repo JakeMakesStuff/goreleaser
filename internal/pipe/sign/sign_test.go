@@ -29,26 +29,26 @@ func TestMain(m *testing.M) {
 	tmpDir := os.TempDir()
 	keyring = filepath.Join(tmpDir, fmt.Sprintf("gorel_gpg_test.%d", rand.Int()))
 	fmt.Println("copying", originKeyring, "to", keyring)
-	if out, err := copyKeyring(originKeyring, keyring); err != nil {
-		fmt.Printf("failed to copy %s to %s: %s\n%s\n",
-			originKeyring, keyring, err, string(out))
+	if err := copyKeyring(originKeyring, keyring); err != nil {
+		fmt.Printf("failed to copy %s to %s: %s\n",
+			originKeyring, keyring, err)
 		os.Exit(1)
 	}
 	defer os.RemoveAll(keyring)
 	os.Exit(m.Run())
 }
 
-func copyKeyring(origin, target string) ([]byte, error) {
+func copyKeyring(origin, target string) (error) {
 	if runtime.GOOS == "windows" {
-		return exec.Command("xcopy", "/I", "/E", origin, target).CombinedOutput()
+		return exec.Command("xcopy", "/I", "/E", origin, target).Run()
 	}
-	b, err := exec.Command("cp", "-Rf", origin, target).CombinedOutput()
+	err := exec.Command("cp", "-Rf", origin, target).Run()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = exec.Command("chmod", "-R", "0700", target).Run()
-	return b, err
+	return err
 }
 
 func TestDescription(t *testing.T) {
