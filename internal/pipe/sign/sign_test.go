@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 	tmpDir := os.TempDir()
 	keyring = filepath.Join(tmpDir, fmt.Sprintf("gorel_gpg_test.%d", rand.Int()))
 	fmt.Println("copying", originKeyring, "to", keyring)
-	if out, err := copyDirRecursively(originKeyring, keyring); err != nil {
+	if out, err := copyKeyring(originKeyring, keyring); err != nil {
 		fmt.Printf("failed to copy %s to %s: %s\n%s\n",
 			originKeyring, keyring, err, string(out))
 		os.Exit(1)
@@ -38,11 +38,17 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func copyDirRecursively(origin, target string) ([]byte, error) {
+func copyKeyring(origin, target string) ([]byte, error) {
 	if runtime.GOOS == "windows" {
 		return exec.Command("xcopy", "/I", "/E", origin, target).CombinedOutput()
 	}
-	return exec.Command("cp", "-Rf", origin, target).CombinedOutput()
+	b, err := exec.Command("cp", "-Rf", origin, target).CombinedOutput()
+	if err != nil {
+		return nil, err
+	}
+
+	err = exec.Command("chmod", "-R", "0700", target).Run()
+	return b, err
 }
 
 func TestDescription(t *testing.T) {
