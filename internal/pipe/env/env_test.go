@@ -219,7 +219,7 @@ func TestLoadEnv(t *testing.T) {
 		assert.NoError(tt, err)
 		var file = filepath.Join(folder, "token")
 		assert.NoError(tt, err)
-		assert.NoError(tt, ioutil.WriteFile(file, []byte("123"), 0377))
+		assert.NoError(tt, ioutil.WriteFile(file, []byte("123"), 0077))
 		v, err := loadEnv(env, file)
 		assert.EqualError(tt, err, fmt.Sprintf("open %s: permission denied", file))
 		assert.Equal(tt, "", v)
