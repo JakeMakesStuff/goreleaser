@@ -342,9 +342,10 @@ func TestChangelogOnBranchWithSameNameAsTag(t *testing.T) {
 
 func CopyDirectory(source, target string) error {
 	if runtime.GOOS == "windows" {
-		b, err := exec.Command("xcopy", "/I", "/E", source, target).CombinedOutput()
+		args := []string{"xcopy", "/I", "/E", source, target}
+		b, err := exec.Command(args[0], args[1:]...).CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("%w:\n%s", err, string(b))
+			return fmt.Errorf("%q: %w:\n%s", args, err, string(b))
 		}
 	}
 	_, err := exec.Command("cp", "-Rf", source, target).CombinedOutput()
