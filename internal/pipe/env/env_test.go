@@ -214,7 +214,7 @@ func TestLoadEnv(t *testing.T) {
 	})
 	t.Run("env file is not readable", func(tt *testing.T) {
 		if runtime.GOOS == "windows" {
-			t.Skip("owner permissions aren't settable on Windows")
+			tt.Skip("owner permissions aren't settable on Windows")
 		}
 
 		var env = "SUPER_SECRET_ENV_NOPE"
