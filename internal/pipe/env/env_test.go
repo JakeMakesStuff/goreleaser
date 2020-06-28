@@ -124,7 +124,6 @@ func TestEmptyGithubEnvFile(t *testing.T) {
 	assert.NoError(t, os.Unsetenv("GITHUB_TOKEN"))
 	f, err := ioutil.TempFile("", "token")
 	assert.NoError(t, err)
-	assert.NoError(t, os.Chmod(f.Name(), 0377))
 	var ctx = &context.Context{
 		Config: config.Project{
 			EnvFiles: config.EnvFiles{
@@ -132,14 +131,13 @@ func TestEmptyGithubEnvFile(t *testing.T) {
 			},
 		},
 	}
-	assert.EqualError(t, Pipe{}.Run(ctx), fmt.Sprintf("failed to load github token: open %s: permission denied", f.Name()))
+	assert.EqualError(t, Pipe{}.Run(ctx), "failed to load github token: EOF")
 }
 
 func TestEmptyGitlabEnvFile(t *testing.T) {
 	assert.NoError(t, os.Unsetenv("GITLAB_TOKEN"))
 	f, err := ioutil.TempFile("", "token")
 	assert.NoError(t, err)
-	assert.NoError(t, os.Chmod(f.Name(), 0377))
 	var ctx = &context.Context{
 		Config: config.Project{
 			EnvFiles: config.EnvFiles{
@@ -147,14 +145,13 @@ func TestEmptyGitlabEnvFile(t *testing.T) {
 			},
 		},
 	}
-	assert.EqualError(t, Pipe{}.Run(ctx), fmt.Sprintf("failed to load gitlab token: open %s: permission denied", f.Name()))
+	assert.EqualError(t, Pipe{}.Run(ctx), "failed to load gitlab token: EOF")
 }
 
 func TestEmptyGiteaEnvFile(t *testing.T) {
 	assert.NoError(t, os.Unsetenv("GITEA_TOKEN"))
 	f, err := ioutil.TempFile("", "token")
 	assert.NoError(t, err)
-	assert.NoError(t, os.Chmod(f.Name(), 0377))
 	var ctx = &context.Context{
 		Config: config.Project{
 			EnvFiles: config.EnvFiles{
@@ -162,7 +159,7 @@ func TestEmptyGiteaEnvFile(t *testing.T) {
 			},
 		},
 	}
-	assert.EqualError(t, Pipe{}.Run(ctx), fmt.Sprintf("failed to load gitea token: open %s: permission denied", f.Name()))
+	assert.EqualError(t, Pipe{}.Run(ctx), "failed to load gitea token: EOF")
 }
 
 func TestInvalidEnvChecksSkipped(t *testing.T) {
