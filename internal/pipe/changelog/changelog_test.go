@@ -1,11 +1,12 @@
 package changelog
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"runtime"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -341,9 +342,13 @@ func TestChangelogOnBranchWithSameNameAsTag(t *testing.T) {
 
 func CopyDirectory(source, target string) error {
 	if runtime.GOOS == "windows" {
-		return exec.Command("xcopy", "/I", "/E", source, target).Run()
+		b, err := exec.Command("xcopy", "/I", "/E", source, target).CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%w:\n%s", err, string(b))
+		}
 	}
-	return exec.Command("cp", "-Rf", source, target).Run()
+	_, err := exec.Command("cp", "-Rf", source, target).CombinedOutput()
+	return err
 }
 
 func TestChangeLogWithReleaseHeader(t *testing.T) {
