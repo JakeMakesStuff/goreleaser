@@ -1,7 +1,6 @@
 package changelog
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -342,14 +341,9 @@ func TestChangelogOnBranchWithSameNameAsTag(t *testing.T) {
 
 func CopyDirectory(source, target string) error {
 	if runtime.GOOS == "windows" {
-		args := []string{"xcopy", "/I", "/E", source, target}
-		b, err := exec.Command(args[0], args[1:]...).CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%q: %w:\n%s", args, err, string(b))
-		}
+		return exec.Command("xcopy", "/I", "/E", source, target).Run()
 	}
-	_, err := exec.Command("cp", "-Rf", source, target).CombinedOutput()
-	return err
+	return exec.Command("cp", "-Rf", source, target).Run()
 }
 
 func TestChangeLogWithReleaseHeader(t *testing.T) {
