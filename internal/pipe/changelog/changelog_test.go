@@ -46,7 +46,9 @@ func TestChangelogProvidedViaFlagAndSkipEnabled(t *testing.T) {
 func TestChangelogProvidedViaFlagDoesntExist(t *testing.T) {
 	var ctx = context.New(config.Project{})
 	ctx.ReleaseNotes = "testdata/changes.nope"
-	require.EqualError(t, Pipe{}.Run(ctx), "open testdata/changes.nope: no such file or directory")
+	err := Pipe{}.Run(ctx)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "open testdata/changes.nope: ")
 }
 
 func TestChangelogSkip(t *testing.T) {
@@ -58,13 +60,17 @@ func TestChangelogSkip(t *testing.T) {
 func TestReleaseHeaderProvidedViaFlagDoesntExist(t *testing.T) {
 	var ctx = context.New(config.Project{})
 	ctx.ReleaseHeader = "testdata/header.nope"
-	require.EqualError(t, Pipe{}.Run(ctx), "open testdata/header.nope: no such file or directory")
+	err := Pipe{}.Run(ctx)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "open testdata/header.nope: ")
 }
 
 func TestReleaseFooterProvidedViaFlagDoesntExist(t *testing.T) {
 	var ctx = context.New(config.Project{})
 	ctx.ReleaseFooter = "testdata/footer.nope"
-	require.EqualError(t, Pipe{}.Run(ctx), "open testdata/footer.nope: no such file or directory")
+	err := Pipe{}.Run(ctx)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "open testdata/footer.nope: ")
 }
 
 func TestSnapshot(t *testing.T) {
