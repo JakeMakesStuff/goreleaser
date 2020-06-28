@@ -358,7 +358,7 @@ func TestChangeLogWithReleaseHeader(t *testing.T) {
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
 
-	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(filepath.Join(current, "testdata"), filepath.Join(tmpdir, "testdata")))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -384,7 +384,7 @@ func TestChangeLogWithTemplatedReleaseHeader(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(filepath.Join(current, "testdata"), filepath.Join(tmpdir, "testdata")))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -409,7 +409,7 @@ func TestChangeLogWithReleaseFooter(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(filepath.Join(current, "testdata"), filepath.Join(tmpdir, "testdata")))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -435,7 +435,7 @@ func TestChangeLogWithTemplatedReleaseFooter(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(filepath.Join(current, "testdata"), filepath.Join(tmpdir, "testdata")))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
