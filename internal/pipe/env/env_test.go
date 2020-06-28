@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/goreleaser/goreleaser/pkg/config"
@@ -214,13 +215,13 @@ func TestLoadEnv(t *testing.T) {
 	t.Run("env file is not readable", func(tt *testing.T) {
 		var env = "SUPER_SECRET_ENV_NOPE"
 		assert.NoError(tt, os.Unsetenv(env))
-		f, err := ioutil.TempFile("", "token")
-		assert.NoError(t, err)
-		fmt.Fprintf(f, "123")
-		err = os.Chmod(f.Name(), 0000)
+		folder, err := ioutil.TempDir("", "goreleasertest")
 		assert.NoError(tt, err)
-		v, err := loadEnv(env, f.Name())
-		assert.EqualError(tt, err, fmt.Sprintf("open %s: permission denied", f.Name()))
+		var file = filepath.Join(folder, "token")
+		assert.NoError(tt, err)
+		assert.NoError(tt, ioutil.WriteFile(file, []byte("123"), 0377))
+		v, err := loadEnv(env, file)
+		assert.EqualError(tt, err, fmt.Sprintf("open %s: permission denied", file))
 		assert.Equal(tt, "", v)
 	})
 }
