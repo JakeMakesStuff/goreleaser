@@ -3,6 +3,8 @@ package changelog
 import (
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"runtime"
 	"path/filepath"
 	"testing"
 
@@ -337,12 +339,20 @@ func TestChangelogOnBranchWithSameNameAsTag(t *testing.T) {
 	}
 }
 
+func CopyDirectory(source, target string) error {
+	if runtime.GOOS == "windows" {
+		return exec.Command("xcopy", "/I", "/E", source, target).Run()
+	}
+	return exec.Command("cp", "-Rf", source, target).Run()
+}
+
 func TestChangeLogWithReleaseHeader(t *testing.T) {
 	current, err := os.Getwd()
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, os.Symlink(current+"/testdata", tmpdir+"/testdata"))
+
+	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -368,7 +378,7 @@ func TestChangeLogWithTemplatedReleaseHeader(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, os.Symlink(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -393,7 +403,7 @@ func TestChangeLogWithReleaseFooter(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, os.Symlink(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
@@ -419,7 +429,7 @@ func TestChangeLogWithTemplatedReleaseFooter(t *testing.T) {
 	require.NoError(t, err)
 	tmpdir, back := testlib.Mktmp(t)
 	defer back()
-	require.NoError(t, os.Symlink(current+"/testdata", tmpdir+"/testdata"))
+	require.NoError(t, CopyDirectory(current+"/testdata", tmpdir+"/testdata"))
 	testlib.GitInit(t)
 	var msgs = []string{
 		"initial commit",
