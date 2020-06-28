@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"testing"
 
 	"github.com/goreleaser/goreleaser/pkg/config"
@@ -213,16 +212,12 @@ func TestLoadEnv(t *testing.T) {
 		assert.Equal(tt, "123", v)
 	})
 	t.Run("env file is not readable", func(tt *testing.T) {
-		if runtime.GOOS == "windows" {
-			tt.Skip("owner permissions aren't settable on Windows")
-		}
-
 		var env = "SUPER_SECRET_ENV_NOPE"
 		assert.NoError(tt, os.Unsetenv(env))
 		f, err := ioutil.TempFile("", "token")
 		assert.NoError(t, err)
 		fmt.Fprintf(f, "123")
-		err = os.Chmod(f.Name(), 0377)
+		err = os.Chmod(f.Name(), 0077)
 		assert.NoError(tt, err)
 		v, err := loadEnv(env, f.Name())
 		assert.EqualError(tt, err, fmt.Sprintf("open %s: permission denied", f.Name()))
